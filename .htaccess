@@ -6,3 +6,11 @@
   Require all denied
 </Files>
 Options -Indexes
+
+# App (PWA)
+AddType application/manifest+json .webmanifest
+<IfModule mod_headers.c>
+  <Files "sw.js">
+    Header set Cache-Control "no-cache"
+  </Files>
+</IfModule>

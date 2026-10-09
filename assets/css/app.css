@@ -37,7 +37,10 @@ h1, h2, h3 { line-height: 1.2; }
   .marca img { height: 40px; max-width: 120px; }
 }
 .cabecera a { color: #fff; }
-.pie { padding: 24px 16px; font-size: .85rem; text-align: right; }
+.pie { padding: 24px 16px; font-size: .85rem; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pie a:only-child, .pie [hidden] + a { margin-left: auto; }
+/* App instalada: respetar la muesca y la barra de estado */
+@media (display-mode: standalone) { .cabecera { padding-top: max(22px, env(safe-area-inset-top)); } }
 .pie a { color: var(--suave); }
 
 /* Barra de filtros y vistas */

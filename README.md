@@ -72,6 +72,20 @@ Con Nginx, añade una regla equivalente:
 location ~ ^/eventos/(config\.php|config\.sample\.php|inc/|lib/|sql/|tools/) { deny all; }
 ```
 
+## App móvil (PWA)
+
+La agenda pública se puede instalar como app en el móvil u ordenador, sin pasar por ninguna tienda:
+
+- **Android / Chrome / Edge:** botón **«📲 Instalar app»** al pie de la agenda (o menú del navegador → «Instalar aplicación»).
+- **iPhone / iPad:** en Safari, botón **Compartir → «Añadir a pantalla de inicio»** (el botón «Instalar app» lo explica).
+
+La app es la misma web: cualquier cambio publicado llega automáticamente. Funciona sin conexión mostrando
+la última agenda consultada. Requiere que el sitio se sirva por **HTTPS**.
+
+Ficheros: `manifest.webmanifest`, `sw.js` (service worker), `assets/js/app.js` y `assets/icons/`.
+Si cambia el logo, regenera los iconos con `php tools/generar_iconos.php`.
+Al modificar `sw.js`, sube el número de `VERSION` para que los móviles renueven la caché.
+
 ## Integración en la página inicial del portal SUAP
 
 **Opción 1: iframe** (la más sencilla). `embed=1` quita la cabecera y el fondo:
