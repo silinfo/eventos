@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 define('APP_ROOT', dirname(__DIR__));
 
+// Búfer de salida: un espacio o BOM accidental antes de "<?php" (p. ej. en config.php)
+// no debe impedir enviar la cookie de sesión ni las redirecciones.
+ob_start();
+
 $configFile = APP_ROOT . '/config.php';
 if (!is_file($configFile)) {
     http_response_code(500);
@@ -169,13 +173,39 @@ function start_session(): void
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
+    // Si la carpeta de sesiones del servidor no es escribible, usar una propia
+    $ruta = session_save_path();
+    $ruta = $ruta !== '' ? preg_replace('/^.*;/', '', $ruta) : sys_get_temp_dir();
+    if (!is_dir($ruta) || !is_writable($ruta)) {
+        $propia = APP_ROOT . '/sesiones';
+        if (!is_dir($propia)) {
+            @mkdir($propia, 0700, true);
+        }
+        if (is_writable($propia)) {
+            session_save_path($propia);
+        }
+    }
     session_name('suap_eventos');
     session_set_cookie_params([
+        'path'     => '/',
         'httponly' => true,
         'samesite' => 'Lax',
-        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'secure'   => es_https(),
     ]);
-    session_start();
+    if (!session_start()) {
+        error_log('Eventos: no se pudo iniciar la sesión (ruta: ' . session_save_path() . ')');
+    }
+    // Las páginas con formularios no deben quedar en caché (el token cambiaría)
+    if (!headers_sent()) {
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+    }
+}
+
+function es_https(): bool
+{
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+        || ($_SERVER['SERVER_PORT'] ?? '') == 443;
 }
 
 function is_admin(): bool
@@ -217,6 +247,15 @@ function csrf_check(): void
     start_session();
     $t = $_POST['csrf'] ?? '';
     if (!is_string($t) || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $t)) {
+        // Diagnóstico en el error_log del servidor
+        if (empty($_COOKIE[session_name()])) {
+            $motivo = 'el navegador no envió la cookie de sesión';
+        } elseif (empty($_SESSION['csrf'])) {
+            $motivo = 'la sesión llegó vacía (¿no se guardan las sesiones? ruta: ' . session_save_path() . ')';
+        } else {
+            $motivo = 'el token no coincide (formulario antiguo o en caché)';
+        }
+        error_log('Eventos: token CSRF no válido: ' . $motivo);
         http_response_code(400);
         exit('Petición no válida (token CSRF). Vuelve atrás y recarga la página.');
     }
