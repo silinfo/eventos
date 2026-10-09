@@ -48,13 +48,15 @@ if (!empty($_GET['ics'])) {
     // RFC 5545: líneas de máx. 75 octetos, continuadas con un espacio
     $plegar = function (string $l): string {
         $out = '';
-        while (strlen($l) > 75) {
-            $corte = 75;
+        $max = 75;
+        while (strlen($l) > $max) {
+            $corte = $max;
             while ($corte > 0 && (ord($l[$corte]) & 0xC0) === 0x80) {
                 $corte--; // no partir caracteres UTF-8
             }
             $out .= substr($l, 0, $corte) . "\r\n ";
             $l = substr($l, $corte);
+            $max = 74; // las líneas de continuación empiezan por un espacio
         }
         return $out . $l;
     };
