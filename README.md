@@ -57,13 +57,13 @@ En `config.php` hay dos logos:
 
 | Clave        | Uso                                                                 | Valor por defecto |
 |--------------|---------------------------------------------------------------------|-------------------|
-| `logo`       | Extendido: cabecera del portal, acceso, cartel y listado PDF        | `http://ciutat.com/portal/intranet/img/logo_600.png` |
-| `logo_corto` | Breve: cabecera de gestión, portal en móvil, pie del cartel, favicon | `https://www.ciutat.com/domicilios/images/logo_eg.jpg` |
+| `logo`       | Extendido: cabecera del portal, acceso, cartel y listado PDF        | `assets/img/logo_600.png` |
+| `logo_corto` | Breve: cabecera de gestión, portal en móvil, pie del cartel, favicon | `assets/img/logo_eg.jpg` |
 
-Si el valor es una URL, la primera vez se descarga y se guarda en `assets/logos/`
+Los dos logos van incluidos en `assets/img/`. Para cambiarlos, sustituye esos ficheros.
+También se puede poner una URL: en ese caso la primera vez se descarga y se guarda en `assets/logos/`
 (la carpeta necesita permiso de escritura para el usuario del servidor web). Si el servidor
-no tiene salida a Internet, descarga tú los ficheros, cópialos por ejemplo en `assets/img/`
-y pon la ruta relativa: `'logo' => 'assets/img/logo_600.png'`.
+no tiene salida a Internet, usa rutas locales.
 Para forzar una nueva descarga tras cambiar el logo, vacía `assets/logos/`.
 
 Con Apache, los `.htaccess` incluidos bloquean el acceso web a `config.php`, `inc/`, `lib/`, `sql/` y `tools/`.
