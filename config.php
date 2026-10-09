@@ -9,7 +9,7 @@ return [
         'host'    => 'localhost',
         'name'    => 'silinfo_eventos',
         'user'    => 'silinfo_eventos',
-        'pass'    => 'silinfo@Eventos.07',
+        'pass'    => 'Eventos.07',
         'charset' => 'utf8mb4',
         // 'dsn' => 'sqlite:/ruta/eventos.sqlite',  // opcional: DSN completo (pruebas)
     ],
