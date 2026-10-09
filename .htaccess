@@ -1,0 +1,8 @@
+# Apache: impedir el acceso web a la configuración
+<Files "config.php">
+  Require all denied
+</Files>
+<Files "config.sample.php">
+  Require all denied
+</Files>
+Options -Indexes
