@@ -7,9 +7,9 @@ return [
     // Base de datos MySQL
     'db' => [
         'host'    => 'localhost',
-        'name'    => 'suap_eventos',
-        'user'    => 'suap',
-        'pass'    => 'cambiar',
+        'name'    => 'silinfo_eventos',
+        'user'    => 'silinfoeventos@ciutat.com',
+        'pass'    => 'silinfo@Eventos.07',
         'charset' => 'utf8mb4',
         // 'dsn' => 'sqlite:/ruta/eventos.sqlite',  // opcional: DSN completo (pruebas)
     ],
