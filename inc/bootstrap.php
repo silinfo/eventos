@@ -24,11 +24,18 @@ function db(): PDO
     if ($pdo === null) {
         $c = config('db');
         $dsn = $c['dsn'] ?? sprintf('mysql:host=%s;dbname=%s;charset=%s', $c['host'], $c['name'], $c['charset'] ?? 'utf8mb4');
-        $pdo = new PDO($dsn, $c['user'] ?? null, $c['pass'] ?? null, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ]);
+        try {
+            $pdo = new PDO($dsn, $c['user'] ?? null, $c['pass'] ?? null, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+        } catch (PDOException $ex) {
+            // El detalle va al error_log del servidor; al visitante, un mensaje genérico
+            error_log('Eventos: no se puede conectar con la base de datos: ' . $ex->getMessage());
+            http_response_code(503);
+            exit('La agenda no está disponible en este momento (error de conexión con la base de datos).');
+        }
     }
     return $pdo;
 }
