@@ -176,7 +176,7 @@ function start_session(): void
     // Si la carpeta de sesiones del servidor no es escribible, usar una propia
     $ruta = session_save_path();
     $ruta = $ruta !== '' ? preg_replace('/^.*;/', '', $ruta) : sys_get_temp_dir();
-    if (!is_dir($ruta) || !is_writable($ruta)) {
+    if (!@is_dir($ruta) || !@is_writable($ruta)) {
         $propia = APP_ROOT . '/sesiones';
         if (!is_dir($propia)) {
             @mkdir($propia, 0700, true);
