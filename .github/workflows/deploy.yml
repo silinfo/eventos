@@ -1,0 +1,47 @@
+# Publica automáticamente la aplicación en HostGator por FTP.
+#
+# Antes de usarlo, crea estos secretos en GitHub
+# (Settings → Secrets and variables → Actions → New repository secret):
+#   FTP_SERVER    p. ej. ftp.tudominio.com
+#   FTP_USERNAME  usuario de la cuenta FTP (creada en cPanel → Cuentas FTP)
+#   FTP_PASSWORD  contraseña de esa cuenta
+#
+# En el servidor no se tocan config.php ni assets/logos/: no están en el
+# repositorio y la acción solo borra ficheros que ella misma subió.
+
+name: Publicar en HostGator
+
+on:
+  push:
+    branches: [main]        # rama desde la que se publica
+  workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
+
+concurrency:
+  group: deploy-hostgator
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Subir por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps           # si da error de certificado, prueba con: ftp
+          port: 21
+          # Carpeta de destino, relativa a la carpeta inicial de la cuenta FTP.
+          # Si la cuenta apunta ya a la carpeta de la app, deja ./
+          # Si apunta a la raíz del hosting, usa p. ej. ./public_html/eventos/
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            README.md
+            config.sample.php
