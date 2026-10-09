@@ -24,6 +24,7 @@ if (!empty($_GET['ics'])) {
         $fin = date('Ymd', strtotime(($ev['fecha_fin'] ?: $ev['fecha']) . ' +1 day'));
         $dt = 'DTSTART;VALUE=DATE:' . date('Ymd', strtotime($ev['fecha'])) . "\r\nDTEND;VALUE=DATE:$fin";
     }
+    $cartel = url_absoluta('cartel.php?id=' . $ev['id']);
     $host = preg_replace('/[^a-z0-9.\-]/i', '', $_SERVER['HTTP_HOST'] ?? 'suap');
     $lineas = [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SUAP//Eventos//ES', 'CALSCALE:GREGORIAN',
@@ -32,18 +33,32 @@ if (!empty($_GET['ics'])) {
         'DTSTAMP:' . gmdate('Ymd\THis\Z'),
         $dt,
         'SUMMARY:' . $esc($ev['titulo']),
-        'DESCRIPTION:' . $esc(trim($ev['descripcion'] . ($ev['url'] ? "\n\n" . $ev['url'] : ''))),
+        'DESCRIPTION:' . $esc(trim($ev['descripcion']
+            . ($ev['url'] ? "\n\nMás información: " . $ev['url'] : '')
+            . "\n\nCartel: " . $cartel)),
         'LOCATION:' . $esc($ev['lugar']),
         'CATEGORIES:' . $esc(tipo_nombre($ev['tipo'])),
     ];
-    if ($ev['url']) {
-        $lineas[] = 'URL:' . $ev['url'];
-    }
+    $lineas[] = 'URL:' . ($ev['url'] ?: url_absoluta('evento.php?id=' . $ev['id']));
+    $lineas[] = 'ATTACH;FMTTYPE=application/pdf:' . $cartel;
     $lineas[] = 'END:VEVENT';
     $lineas[] = 'END:VCALENDAR';
     header('Content-Type: text/calendar; charset=utf-8');
     header('Content-Disposition: attachment; filename="evento-' . $ev['id'] . '.ics"');
-    echo implode("\r\n", $lineas) . "\r\n";
+    // RFC 5545: líneas de máx. 75 octetos, continuadas con un espacio
+    $plegar = function (string $l): string {
+        $out = '';
+        while (strlen($l) > 75) {
+            $corte = 75;
+            while ($corte > 0 && (ord($l[$corte]) & 0xC0) === 0x80) {
+                $corte--; // no partir caracteres UTF-8
+            }
+            $out .= substr($l, 0, $corte) . "\r\n ";
+            $l = substr($l, $corte);
+        }
+        return $out . $l;
+    };
+    echo implode("\r\n", array_map($plegar, $lineas)) . "\r\n";
     exit;
 }
 ?>
@@ -74,6 +89,7 @@ if (!empty($_GET['ics'])) {
     <?php endif; ?>
     <p class="acciones">
       <?php if ($ev['url']): ?><a class="btn" href="<?= e($ev['url']) ?>" target="_blank" rel="noopener">Más información ↗</a><?php endif; ?>
+      <a class="btn sec" href="cartel.php?id=<?= (int)$ev['id'] ?>" target="_blank">Ver cartel (PDF)</a>
       <a class="btn sec" href="evento.php?id=<?= (int)$ev['id'] ?>&amp;ics=1">Añadir a mi calendario</a>
     </p>
   </article>

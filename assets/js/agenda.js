@@ -54,6 +54,7 @@
       (ev.descripcion ? '<div class="descripcion">' + esc(ev.descripcion).replace(/\n/g, '<br>') + '</div>' : '') +
       '<p class="acciones">' +
       (ev.url ? '<a class="btn" href="' + esc(ev.url) + '" target="_blank" rel="noopener">Más información ↗</a> ' : '') +
+      '<a class="btn sec" href="cartel.php?id=' + ev.id + '" target="_blank">Ver cartel (PDF)</a> ' +
       '<a class="btn sec" href="evento.php?id=' + ev.id + '&ics=1">Añadir a mi calendario</a>' +
       '</p></div>';
     modal.showModal();

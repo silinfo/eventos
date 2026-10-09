@@ -63,6 +63,18 @@ function url(string $path = ''): string
     return str_repeat('../', $depth) . ltrim($path, '/');
 }
 
+/** URL absoluta de un fichero de la app (usa url_base si está configurada) */
+function url_absoluta(string $path): string
+{
+    $base = trim((string)config('url_base', ''));
+    if ($base === '') {
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+        $base = (es_https() ? 'https' : 'http') . '://' . $host . rtrim($dir, '/') . '/';
+    }
+    return rtrim($base, '/') . '/' . ltrim($path, '/');
+}
+
 function redirect(string $to): void
 {
     header('Location: ' . $to);
