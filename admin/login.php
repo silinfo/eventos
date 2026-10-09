@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 admin_cabecera('Acceso', false);
 ?>
 <div class="panel login">
+  <?php if ($l = logo_web('logo')): ?><p class="login-logo"><img src="<?= e($l) ?>" alt="<?= e(config('organizacion')) ?>"></p><?php endif; ?>
   <h2>Acceso a la gestión</h2>
   <?php if ($hash === ''): ?>
     <p class="aviso error">No hay contraseña configurada. Genera una con

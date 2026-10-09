@@ -54,6 +54,7 @@ if (!empty($_GET['ics'])) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($ev['titulo']) ?> · <?= e(config('organizacion')) ?></title>
 <link rel="stylesheet" href="assets/css/app.css">
+<?= favicon_html() ?>
 <style><?= tipos_css() ?></style>
 </head>
 <body class="publico<?= $embed ? ' embed' : '' ?>">

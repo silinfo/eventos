@@ -36,13 +36,15 @@ $qs = fn(array $extra) => '?' . http_build_query(array_filter(array_merge(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($titulo) ?> · <?= e(config('organizacion')) ?></title>
 <link rel="stylesheet" href="assets/css/app.css">
+<?= favicon_html() ?>
 <style><?= tipos_css() ?></style>
 </head>
 <body class="publico<?= $embed ? ' embed' : '' ?>">
 <?php if (!$embed): ?>
 <header class="cabecera">
   <div class="contenedor">
-    <div>
+    <?= logo_html('logo') ?>
+    <div class="titulos">
       <p class="org"><?= e(config('organizacion')) ?></p>
       <h1><?= e($titulo) ?></h1>
     </div>

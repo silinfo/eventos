@@ -11,12 +11,14 @@ function admin_cabecera(string $titulo, bool $menu = true): void
 <meta name="robots" content="noindex">
 <title><?= e($titulo) ?> · Gestión de eventos</title>
 <link rel="stylesheet" href="../assets/css/app.css">
+<?= favicon_html() ?>
 <style><?= tipos_css() ?></style>
 </head>
 <body class="admin">
 <header class="cabecera">
   <div class="contenedor">
-    <div>
+    <?= logo_html('logo_corto') ?>
+    <div class="titulos">
       <p class="org"><?= e(config('organizacion')) ?></p>
       <h1>Gestión de eventos</h1>
     </div>

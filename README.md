@@ -49,8 +49,22 @@ Requisitos: PHP 7.4 o superior (probado con 8.3) con `pdo_mysql`, `mbstring`, `i
    ```bash
    php tools/hash_password.php "UnaContraseñaLarga"
    ```
-5. Opcional: indica en `config.php` el `logo` para los carteles y la `url_base` pública
-   (se usa para el QR de los eventos que no tienen enlace propio).
+5. Opcional: indica la `url_base` pública (se usa para el QR de los eventos que no tienen enlace propio).
+
+### Logos
+
+En `config.php` hay dos logos:
+
+| Clave        | Uso                                                                 | Valor por defecto |
+|--------------|---------------------------------------------------------------------|-------------------|
+| `logo`       | Extendido: cabecera del portal, acceso, cartel y listado PDF        | `http://ciutat.com/portal/intranet/img/logo_600.png` |
+| `logo_corto` | Breve: cabecera de gestión, portal en móvil, pie del cartel, favicon | `https://www.ciutat.com/domicilios/images/logo_eg.jpg` |
+
+Si el valor es una URL, la primera vez se descarga y se guarda en `assets/logos/`
+(la carpeta necesita permiso de escritura para el usuario del servidor web). Si el servidor
+no tiene salida a Internet, descarga tú los ficheros, cópialos por ejemplo en `assets/img/`
+y pon la ruta relativa: `'logo' => 'assets/img/logo_600.png'`.
+Para forzar una nueva descarga tras cambiar el logo, vacía `assets/logos/`.
 
 Con Apache, los `.htaccess` incluidos bloquean el acceso web a `config.php`, `inc/`, `lib/`, `sql/` y `tools/`.
 Con Nginx, añade una regla equivalente:

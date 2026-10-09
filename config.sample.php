@@ -22,8 +22,10 @@ return [
     'organizacion' => 'Servicio de Urgencias de Atención Primaria (SUAP)',
     'titulo_portal' => 'Agenda de eventos',
 
-    // Logo opcional para carteles (PNG o JPG, ruta absoluta o relativa a la raíz)
-    'logo' => '',
+    // Logos (PNG, JPG o GIF). Admiten una URL o una ruta relativa a la raíz de la app.
+    // Si es una URL, se descarga una vez y se guarda en assets/logos/ (debe tener permiso de escritura).
+    'logo'       => 'http://ciutat.com/portal/intranet/img/logo_600.png',        // extendido
+    'logo_corto' => 'https://www.ciutat.com/domicilios/images/logo_eg.jpg',      // breve
 
     // URL pública de la aplicación (para el QR de los carteles cuando el evento
     // no tiene enlace propio). Ej: https://intranet.ejemplo.es/suap/eventos/

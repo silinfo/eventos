@@ -51,6 +51,7 @@ class PdfSuap extends FPDF
         }
         $this->SetFillColor(185, 28, 28);
         $this->Rect(0, 0, $this->GetPageWidth(), 4, 'F');
+        pdf_logo($this, ['logo', 'logo_corto'], $this->GetPageWidth() - $this->rMargin - 70, 8, 70, 16, 'R');
         $this->SetY(9);
         $this->SetFont('Helvetica', '', 9);
         $this->SetTextColor(100, 110, 120);
@@ -166,27 +167,27 @@ function pdf_cartel(array $ev): PdfSuap
     $pdf->AddPage();
     $W = 210; $M = 18; $ancho = $W - 2 * $M;
 
-    // Banda superior
-    $pdf->SetFillColor($r, $g, $b);
-    $pdf->Rect(0, 0, $W, 58, 'F');
-    // Franja decorativa
-    $pdf->SetFillColor(min(255, $r + 40), min(255, $g + 40), min(255, $b + 40));
-    $pdf->Rect(0, 58, $W, 3, 'F');
+    // Franja blanca con el logo extendido (o el breve si no hay extendido)
+    $yBanda = 0;
+    $wLogo = pdf_logo($pdf, ['logo', 'logo_corto'], $M, 7, 110, 18);
+    if ($wLogo > 0) {
+        $yBanda = 32;
+    }
 
-    $logo = (string)config('logo', '');
-    if ($logo !== '' && $logo[0] !== '/') {
-        $logo = APP_ROOT . '/' . $logo;
-    }
-    $hayLogo = $logo !== '' && is_file($logo);
-    if ($hayLogo) {
-        $pdf->Image($logo, $W - $M - 35, 10, 0, 22);
-    }
+    // Banda de color con el tipo de evento
+    $hBanda = $wLogo > 0 ? 26 : 58;
+    $pdf->SetFillColor($r, $g, $b);
+    $pdf->Rect(0, $yBanda, $W, $hBanda, 'F');
+    $pdf->SetFillColor(min(255, $r + 40), min(255, $g + 40), min(255, $b + 40));
+    $pdf->Rect(0, $yBanda + $hBanda, $W, 3, 'F');
 
     $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetXY($M, 14);
-    $pdf->SetFont('Helvetica', '', 11);
-    $pdf->MultiCell($hayLogo ? $ancho - 40 : $ancho, 5.5, pdf_txt(config('organizacion')), 0, 'L');
-    $pdf->SetXY($M, 36);
+    if ($wLogo === 0.0) {
+        $pdf->SetXY($M, 14);
+        $pdf->SetFont('Helvetica', '', 11);
+        $pdf->MultiCell($ancho, 5.5, pdf_txt(config('organizacion')), 0, 'L');
+    }
+    $pdf->SetXY($M, $yBanda + $hBanda - 22);
     $pdf->SetFont('Helvetica', 'B', 22);
     $pdf->Cell($ancho, 10, pdf_txt(mb_strtoupper($tipo['nombre'])), 0, 1, 'L');
 
@@ -201,7 +202,7 @@ function pdf_cartel(array $ev): PdfSuap
     $tam += 2;
     $alto = $tam * 0.45;
     $pdf->SetTextColor(29, 39, 51);
-    $pdf->SetXY($M, 74);
+    $pdf->SetXY($M, $yBanda + $hBanda + 16);
     $pdf->MultiCell($ancho, $alto, $pdf->recortar($ancho, $titulo, 4), 0, 'L');
 
     // Bloque de fecha destacado
@@ -286,10 +287,22 @@ function pdf_cartel(array $ev): PdfSuap
 
     $pdf->SetFillColor($r, $g, $b);
     $pdf->Rect(0, $yPie, $W, 22, 'F');
-    $pdf->SetXY($M, $yPie + 7);
+    // Logo breve sobre recuadro blanco
+    $wPie = 0.0;
+    if ($f = logo_archivo('logo_corto')) {
+        [$lw, $lh] = pdf_ajustar($f, 34, 14);
+        try {
+            $pdf->SetFillColor(255, 255, 255);
+            $pdf->Rect($M, $yPie + 4, $lw + 4, 14, 'F');
+            $pdf->Image($f, $M + 2, $yPie + 4 + (14 - $lh) / 2, $lw, $lh);
+            $wPie = $lw + 4;
+        } catch (\Throwable $e) {
+        }
+    }
+    $pdf->SetXY($M + $wPie, $yPie + 7);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Helvetica', 'B', 11);
-    $pdf->Cell($ancho, 8, pdf_txt(config('organizacion')), 0, 0, 'C');
+    $pdf->Cell($ancho - 2 * $wPie, 8, pdf_txt(config('organizacion')), 0, 0, 'C');
 
     return $pdf;
 }
@@ -423,6 +436,37 @@ function pdf_listado(array $eventos, string $titulo, string $subtitulo = ''): Pd
     $pdf->SetTextColor(100, 110, 120);
     $pdf->Cell(0, 5, pdf_txt('Total: ' . count($eventos) . ' evento(s)'), 0, 1);
     return $pdf;
+}
+
+/** Tamaño (mm) de una imagen ajustada dentro de una caja de $maxW x $maxH */
+function pdf_ajustar(string $f, float $maxW, float $maxH): array
+{
+    [$pw, $ph] = getimagesize($f);
+    $k = min($maxW / $pw, $maxH / $ph);
+    return [$pw * $k, $ph * $k];
+}
+
+/**
+ * Dibuja el primer logo disponible de $claves dentro de la caja indicada.
+ * Devuelve el ancho ocupado (0 si no hay logo).
+ */
+function pdf_logo(FPDF $pdf, array $claves, float $x, float $y, float $maxW, float $maxH, string $alinear = 'L'): float
+{
+    foreach ($claves as $c) {
+        if ($f = logo_archivo($c)) {
+            [$w, $h] = pdf_ajustar($f, $maxW, $maxH);
+            if ($alinear === 'R') {
+                $x += $maxW - $w;
+            }
+            try {
+                $pdf->Image($f, $x, $y + ($maxH - $h) / 2, $w, $h);
+            } catch (\Throwable $e) {
+                continue;
+            }
+            return $w;
+        }
+    }
+    return 0.0;
 }
 
 /** Nombre de fichero seguro a partir de un texto */
