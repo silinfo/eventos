@@ -13,7 +13,7 @@ name: Publicar en HostGator
 
 on:
   push:
-    branches: [main]        # rama desde la que se publica
+        branches: [claude/nice-fermi-b6mkno]        # rama desde la que se publica
   workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
 
 concurrency:
