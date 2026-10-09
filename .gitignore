@@ -1,2 +1,3 @@
 config.php
+hash.php
 *.sqlite
